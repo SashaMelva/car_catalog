@@ -1,0 +1,13 @@
+url = ""
+
+level = "debug"
+logEncoding = "console"
+
+nameDB = ""
+hostDB =  ""
+portDB = ""
+usesrDB = ""
+passwordDB = ""
+
+hostHttpServer = ""
+portHttpServe = ""
