@@ -35,7 +35,7 @@ type ConfigDB struct {
 func New(pahToFile string) Config {
 	viper.AddConfigPath(pahToFile)
 	viper.SetConfigName("config")
-	viper.SetConfigType("toml")
+	viper.SetConfigType("env")
 	viper.AddConfigPath(".")
 
 	err := viper.ReadInConfig()
