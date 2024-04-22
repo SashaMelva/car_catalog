@@ -1,6 +1,7 @@
 package hendler
 
 import (
+	"net/http"
 	"sync"
 	"time"
 
@@ -14,9 +15,9 @@ type Service struct {
 	sync.RWMutex
 }
 
-type ResponseBody struct {
-	Message      string
-	MessageError string
+type ErrorResponseBody struct {
+	Status  int
+	Message []byte
 }
 
 func NewService(log *zap.SugaredLogger, application *app.App, timeout time.Duration) *Service {
@@ -24,4 +25,11 @@ func NewService(log *zap.SugaredLogger, application *app.App, timeout time.Durat
 		Logger: *log,
 		app:    *application,
 	}
+}
+
+func returnError(errorResponse *ErrorResponseBody, w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(errorResponse.Status)
+	w.Write(errorResponse.Message)
 }

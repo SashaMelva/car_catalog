@@ -8,6 +8,7 @@ import (
 
 	"github.com/SashaMelva/car_catalog/internal/app"
 	"github.com/SashaMelva/car_catalog/internal/config"
+	"github.com/SashaMelva/car_catalog/server/hendler"
 	"github.com/rs/cors"
 	"go.uber.org/zap"
 )
@@ -21,11 +22,12 @@ func NewServer(log *zap.SugaredLogger, app *app.App, config *config.ConfigHttpSe
 	timeout := config.Timeout * time.Second
 
 	mux := http.NewServeMux()
-	// h := hendler.NewService(log, app, timeout)
+	h := hendler.NewService(log, app, timeout)
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello World!")
 	})
+	mux.HandleFunc("/car", h.CarHendler)
 
 	cors := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
