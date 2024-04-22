@@ -27,7 +27,7 @@ func NewServer(log *zap.SugaredLogger, app *app.App, config *config.ConfigHttpSe
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello World!")
 	})
-	mux.HandleFunc("/car", h.CarHendler)
+	mux.HandleFunc("/car-catalog", h.CarCatalogHendler)
 
 	cors := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},

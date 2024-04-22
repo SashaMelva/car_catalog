@@ -15,12 +15,26 @@ type App struct {
 }
 
 func New(logger *zap.SugaredLogger, storage *memory.Storage) *App {
-	r, _ := regexp.Compile(`^[АВЕКМНОРСТУХ][0-9][0-9][0-9][АВЕКМНОРСТУХ][АВЕКМНОРСТУХ]$`)
+	r, _ := regexp.Compile(`^[АВЕКМНОРСТУХ][0-9][0-9][0-9][АВЕКМНОРСТУХ][АВЕКМНОРСТУХ][0-9][0-9][0-9]$`)
 	return &App{
 		storage:     storage,
 		Logger:      logger,
 		RegexRegNum: r,
 	}
+}
+
+func (a *App) AddCarByRegNums(regNums []string) error {
+	var err error
+
+	for i := range regNums {
+		err = a.validRegNum(regNums[i])
+		if err != nil {
+			a.Logger.Error(err)
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (a *App) DeleteCarByRegNum(regNum string) error {
