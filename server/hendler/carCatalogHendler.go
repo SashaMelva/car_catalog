@@ -2,16 +2,23 @@ package hendler
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"net/http"
 	"strings"
 	"time"
+
+	model "github.com/SashaMelva/car_catalog/internal/storage/models"
 )
 
-func (s *Service) CarHendler(w http.ResponseWriter, req *http.Request) {
+func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-
+	if req.Method == http.MethodPost {
+		s.addCarByRegNums(w, req, ctx)
+		return
+	}
 	if req.Method == http.MethodDelete {
 		args := req.URL.Query()
 		regNumsStr := args.Get("regNums")
@@ -31,7 +38,53 @@ func (s *Service) CarHendler(w http.ResponseWriter, req *http.Request) {
 			Status:  http.StatusBadRequest,
 			Message: []byte("Для удаления машины необходим регистрационный номер"),
 		}, w)
+		return
 	}
+}
+
+func (s *Service) addCarByRegNums(w http.ResponseWriter, req *http.Request, ctx context.Context) {
+	regNums := model.RegNumsCatalog{}
+	body, err := io.ReadAll(req.Body)
+
+	if err != nil {
+		returnError(&ErrorResponseBody{
+			Status:  http.StatusInternalServerError,
+			Message: []byte(err.Error()),
+		}, w)
+		return
+	} else {
+		err = json.Unmarshal(body, &regNums)
+		if err != nil {
+			returnError(&ErrorResponseBody{
+				Status:  http.StatusInternalServerError,
+				Message: []byte(err.Error()),
+			}, w)
+			return
+		}
+	}
+
+	if regNums.RegNums == nil {
+		returnError(&ErrorResponseBody{
+			Status:  http.StatusInternalServerError,
+			Message: []byte("Регистрационные номера машин не найдены"),
+		}, w)
+		return
+	}
+
+	err = s.app.AddCarByRegNums(regNums.RegNums)
+
+	if err != nil {
+		s.Logger.Error(w, err.Error(), http.StatusInternalServerError)
+		returnError(&ErrorResponseBody{
+			Status:  http.StatusInternalServerError,
+			Message: []byte(err.Error()),
+		}, w)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Service) deleteCarByRegNum(regNum string, w http.ResponseWriter, req *http.Request, ctx context.Context) {
