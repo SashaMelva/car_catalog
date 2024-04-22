@@ -15,6 +15,12 @@ func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	if req.Method == http.MethodGet {
+	}
+	if req.Method == http.MethodPut {
+		s.updateCars(w, req, ctx)
+		return
+	}
 	if req.Method == http.MethodPost {
 		s.addCarByRegNums(w, req, ctx)
 		return
@@ -72,6 +78,51 @@ func (s *Service) addCarByRegNums(w http.ResponseWriter, req *http.Request, ctx 
 	}
 
 	err = s.app.AddCarByRegNums(regNums.RegNums)
+
+	if err != nil {
+		s.Logger.Error(w, err.Error(), http.StatusInternalServerError)
+		returnError(&ErrorResponseBody{
+			Status:  http.StatusInternalServerError,
+			Message: []byte(err.Error()),
+		}, w)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Service) updateCars(w http.ResponseWriter, req *http.Request, ctx context.Context) {
+	cars := model.CarCatalog{}
+	body, err := io.ReadAll(req.Body)
+
+	if err != nil {
+		returnError(&ErrorResponseBody{
+			Status:  http.StatusInternalServerError,
+			Message: []byte(err.Error()),
+		}, w)
+		return
+	} else {
+		err = json.Unmarshal(body, &cars)
+		if err != nil {
+			returnError(&ErrorResponseBody{
+				Status:  http.StatusInternalServerError,
+				Message: []byte(err.Error()),
+			}, w)
+			return
+		}
+	}
+
+	if cars.Cars == nil {
+		returnError(&ErrorResponseBody{
+			Status:  http.StatusInternalServerError,
+			Message: []byte("Данные пусте"),
+		}, w)
+		return
+	}
+
+	err = s.app.UpdateCars(cars.Cars)
 
 	if err != nil {
 		s.Logger.Error(w, err.Error(), http.StatusInternalServerError)
