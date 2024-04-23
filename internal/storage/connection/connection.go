@@ -20,6 +20,8 @@ func New(confDB *config.ConfigDB, log *zap.SugaredLogger) *StorageConnection {
 		log.Fatal("Cannot open pgx driver: %w", err)
 	}
 
+	log.Debug("DSN connection database " + dsn)
+
 	return &StorageConnection{storage}
 }
 

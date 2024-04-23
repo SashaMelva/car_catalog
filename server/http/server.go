@@ -18,13 +18,15 @@ type Server struct {
 }
 
 func NewServer(log *zap.SugaredLogger, app *app.App, config *config.ConfigHttpServer) *Server {
-	log.Info("URL api" + config.Host + ":" + config.Port)
+	log.Info("URL api " + config.Host + ":" + config.Port)
+	log.Debug("URL api running " + config.Host + ":" + config.Port)
 	timeout := config.Timeout * time.Second
 
 	mux := http.NewServeMux()
 	h := hendler.NewService(log, app, timeout)
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Debug("Test path working")
 		fmt.Fprintf(w, "Hello World!")
 	})
 	mux.HandleFunc("/car-catalog", h.CarCatalogHendler)

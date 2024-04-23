@@ -49,7 +49,8 @@ func main() {
 		}
 	}()
 
-	log.Info("calendar is running...")
+	log.Info("Services is running...")
+	log.Debug("Debug mode enabled")
 
 	if err := httpServer.Start(ctx); err != nil {
 		log.Error("failed to start http server: " + err.Error())

@@ -28,10 +28,13 @@ func New(logger *zap.SugaredLogger, storage *memory.Storage) *App {
 func (a *App) GetCars(option filter.Option) (*model.CarCatalog, error) {
 	var err error
 	catalog := &model.CarCatalog{}
+	a.Logger.Debug("Get cars with plugin: Limit" + string(option.Limit) + " Offset " + string(option.Offset))
 
 	if len(option.Fileds) == 0 {
+		a.Logger.Info("Get cars with not filter. Limit" + string(option.Limit) + " Offset " + string(option.Offset))
 		catalog, err = a.storage.GetAllCars(option.Limit, option.Offset)
 	} else {
+		a.Logger.Info("Get cars with filter. Limit" + string(option.Limit) + " Offset " + string(option.Offset))
 		query := ""
 
 		for i := range option.Fileds {
@@ -40,7 +43,7 @@ func (a *App) GetCars(option filter.Option) (*model.CarCatalog, error) {
 				query += " and "
 			}
 		}
-
+		a.Logger.Debug("Parce filter", query)
 		catalog, err = a.storage.GetCarsByFilter(query, option.Limit, option.Offset)
 	}
 
@@ -54,11 +57,11 @@ func (a *App) GetCars(option filter.Option) (*model.CarCatalog, error) {
 
 func (a *App) AddCarByRegNums(regNums []string) error {
 	var err error
-
+	a.Logger.Info("Run validate reg nums cars")
 	for i := range regNums {
 		err = a.validRegNum(regNums[i])
 		if err != nil {
-			a.Logger.Error(err)
+			a.Logger.Error("Valid error: ", err)
 			return err
 		}
 	}
@@ -68,6 +71,7 @@ func (a *App) AddCarByRegNums(regNums []string) error {
 
 func (a *App) UpdateCars(cars []*model.Car) error {
 	if len(cars) == 1 {
+		a.Logger.Info("Update one car info ", cars[0].RegNum)
 		err := a.storage.UpdateCarFromCatalog(cars[0])
 
 		if err != nil {
@@ -75,6 +79,7 @@ func (a *App) UpdateCars(cars []*model.Car) error {
 			return err
 		}
 	} else if len(cars) > 1 {
+		a.Logger.Info("Update many cars info ")
 		err := a.storage.UpdateCarsFromCatalog(cars)
 
 		if err != nil {
@@ -88,7 +93,7 @@ func (a *App) UpdateCars(cars []*model.Car) error {
 
 func (a *App) DeleteCarByRegNum(regNum []string) error {
 	var err error
-
+	a.Logger.Info("Run validate reg nums cars")
 	if len(regNum) > 0 {
 		for i := range regNum {
 			errNew := a.validRegNum(regNum[i])
@@ -99,7 +104,7 @@ func (a *App) DeleteCarByRegNum(regNum []string) error {
 		}
 
 		if err != nil {
-			a.Logger.Error(err)
+			a.Logger.Error("Valid error: ", err)
 			return err
 		}
 	} else {
@@ -108,6 +113,7 @@ func (a *App) DeleteCarByRegNum(regNum []string) error {
 		return err
 	}
 
+	a.Logger.Info("Delete cars run method sql")
 	err = a.storage.DeleteCarByRegNum(regNum)
 
 	if err != nil {

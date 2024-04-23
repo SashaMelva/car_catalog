@@ -14,6 +14,7 @@ import (
 )
 
 func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
+	s.Logger.Debug("Path responce ", req.Method, req.URL)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
@@ -33,9 +34,10 @@ func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 			limit, err := strconv.Atoi(args.Get("limit"))
 
 			if err != nil {
+				s.Logger.Error(err)
 				returnError(&ErrorResponseBody{
 					Status:  http.StatusBadRequest,
-					Message: []byte("Годы периода не могут быть пустыми"),
+					Message: []byte(err.Error()),
 				}, w)
 				return
 			}
@@ -48,9 +50,10 @@ func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 			offset, err := strconv.Atoi(args.Get("limit"))
 
 			if err != nil {
+				s.Logger.Error(err)
 				returnError(&ErrorResponseBody{
 					Status:  http.StatusBadRequest,
-					Message: []byte("Годы периода не могут быть пустыми"),
+					Message: []byte(err.Error()),
 				}, w)
 				return
 			}
@@ -73,6 +76,7 @@ func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 			split := strings.Split(periodYear, ":")
 
 			if split[0] == "" && split[1] == "" {
+				s.Logger.Error("Годы периода не могут быть пустыми")
 				returnError(&ErrorResponseBody{
 					Status:  http.StatusBadRequest,
 					Message: []byte("Годы периода не могут быть пустыми"),
@@ -87,20 +91,28 @@ func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 			}
 		}
 
+		s.Logger.Debug("Create filter: ", option.Fileds)
+
 		s.getAllCars(option, w, req, ctx)
 	}
+
 	if req.Method == http.MethodPut {
+		s.Logger.Info("Method Put, run update cars")
 		s.updateCars(w, req, ctx)
 		return
 	}
+
 	if req.Method == http.MethodPost {
+		s.Logger.Info("Method Post, run create cars")
 		s.addCarByRegNums(w, req, ctx)
 		return
 	}
+
 	if req.Method == http.MethodDelete {
 		args := req.URL.Query()
 		regNumsStr := args.Get("regNums")
 
+		s.Logger.Info("Method Delete, run delete cars ", regNumsStr)
 		if regNumsStr != "" {
 			regNum := strings.Split(regNumsStr, ",")
 			s.deleteCarByRegNums(regNum, w, req, ctx)
@@ -112,6 +124,8 @@ func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 		}, w)
 		return
 	}
+
+	s.Logger.Debug("Method implementation not found")
 }
 
 func (s *Service) getAllCars(option filter.Option, w http.ResponseWriter, req *http.Request, ctx context.Context) {
@@ -119,7 +133,7 @@ func (s *Service) getAllCars(option filter.Option, w http.ResponseWriter, req *h
 
 	if err != nil {
 		returnError(&ErrorResponseBody{
-			Status:  http.StatusInternalServerError,
+			Status:  http.StatusBadRequest,
 			Message: []byte(err.Error()),
 		}, w)
 		return
@@ -135,6 +149,7 @@ func (s *Service) getAllCars(option filter.Option, w http.ResponseWriter, req *h
 		return
 	}
 
+	s.Logger.Info("OK")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -164,7 +179,7 @@ func (s *Service) addCarByRegNums(w http.ResponseWriter, req *http.Request, ctx 
 
 	if regNums.RegNums == nil {
 		returnError(&ErrorResponseBody{
-			Status:  http.StatusInternalServerError,
+			Status:  http.StatusBadRequest,
 			Message: []byte("Регистрационные номера машин не найдены"),
 		}, w)
 		return
@@ -173,14 +188,15 @@ func (s *Service) addCarByRegNums(w http.ResponseWriter, req *http.Request, ctx 
 	err = s.app.AddCarByRegNums(regNums.RegNums)
 
 	if err != nil {
-		s.Logger.Error(w, err.Error(), http.StatusInternalServerError)
+		s.Logger.Error(w, err.Error(), http.StatusBadRequest)
 		returnError(&ErrorResponseBody{
-			Status:  http.StatusInternalServerError,
+			Status:  http.StatusBadRequest,
 			Message: []byte(err.Error()),
 		}, w)
 		return
 	}
 
+	s.Logger.Info("OK")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -209,7 +225,7 @@ func (s *Service) updateCars(w http.ResponseWriter, req *http.Request, ctx conte
 
 	if cars.Cars == nil {
 		returnError(&ErrorResponseBody{
-			Status:  http.StatusInternalServerError,
+			Status:  http.StatusBadRequest,
 			Message: []byte("Данные пусте"),
 		}, w)
 		return
@@ -218,14 +234,15 @@ func (s *Service) updateCars(w http.ResponseWriter, req *http.Request, ctx conte
 	err = s.app.UpdateCars(cars.Cars)
 
 	if err != nil {
-		s.Logger.Error(w, err.Error(), http.StatusInternalServerError)
+		s.Logger.Error(w, err.Error(), http.StatusBadRequest)
 		returnError(&ErrorResponseBody{
-			Status:  http.StatusInternalServerError,
+			Status:  http.StatusBadRequest,
 			Message: []byte(err.Error()),
 		}, w)
 		return
 	}
 
+	s.Logger.Info("OK")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -235,14 +252,15 @@ func (s *Service) deleteCarByRegNums(regNums []string, w http.ResponseWriter, re
 	err := s.app.DeleteCarByRegNum(regNums)
 
 	if err != nil {
-		s.Logger.Error(w, err.Error(), http.StatusInternalServerError)
+		s.Logger.Error(w, err.Error(), http.StatusBadRequest)
 		returnError(&ErrorResponseBody{
-			Status:  http.StatusInternalServerError,
+			Status:  http.StatusBadRequest,
 			Message: []byte(err.Error()),
 		}, w)
 		return
 	}
 
+	s.Logger.Info("OK")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
