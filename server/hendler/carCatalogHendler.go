@@ -9,13 +9,53 @@ import (
 	"time"
 
 	model "github.com/SashaMelva/car_catalog/internal/storage/models"
+	"github.com/SashaMelva/car_catalog/server/filter"
 )
 
 func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	if req.Method == http.MethodGet {
+		args := req.URL.Query()
+		regNums := args.Get("regNum")
+		mark := args.Get("mark")
+		model := args.Get("model")
+		year := args.Get("year")
+		periodYear := args.Get("periodYear")
+
+		option := filter.NewOption()
+		if regNums != "" {
+			option.AddFileds(filter.ParamRegNum, filter.OperatorEq, regNums, filter.DateStr)
+		}
+		if mark != "" {
+			option.AddFileds(filter.ParamMark, filter.OperatorEq, mark, filter.DateStr)
+		}
+		if model != "" {
+			option.AddFileds(filter.ParamModel, filter.OperatorEq, model, filter.DateStr)
+		}
+		if year != "" {
+			option.AddFileds(filter.ParamYear, filter.OperatorEq, year, filter.DateInt)
+		}
+		if periodYear != "" {
+			split := strings.Split(periodYear, ":")
+
+			if split[0] == "" && split[1] == "" {
+				returnError(&ErrorResponseBody{
+					Status:  http.StatusBadRequest,
+					Message: []byte("Годы периода не могут быть пустыми"),
+				}, w)
+				return
+			} else if split[0] == "" {
+				option.AddFileds(filter.ParamYear, filter.OperatorLowerThen, split[1], filter.DateInt)
+			} else if split[1] == "" {
+				option.AddFileds(filter.ParamYear, filter.OperatorHigherThen, split[0], filter.DateInt)
+			} else {
+				option.AddFileds(filter.ParamYear, filter.OperatorBetween, split[0]+" and "+split[1], filter.DateInt)
+			}
+		}
+
+		s.getAllCars(option, w, req, ctx)
 	}
 	if req.Method == http.MethodPut {
 		s.updateCars(w, req, ctx)
@@ -46,6 +86,33 @@ func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 		}, w)
 		return
 	}
+}
+
+func (s *Service) getAllCars(option filter.Option, w http.ResponseWriter, req *http.Request, ctx context.Context) {
+	cars, err := s.app.GetCars(option)
+
+	if err != nil {
+		returnError(&ErrorResponseBody{
+			Status:  http.StatusInternalServerError,
+			Message: []byte(err.Error()),
+		}, w)
+		return
+	}
+
+	json, err := json.Marshal(cars)
+
+	if err != nil {
+		returnError(&ErrorResponseBody{
+			Status:  http.StatusInternalServerError,
+			Message: []byte(err.Error()),
+		}, w)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write(json)
 }
 
 func (s *Service) addCarByRegNums(w http.ResponseWriter, req *http.Request, ctx context.Context) {

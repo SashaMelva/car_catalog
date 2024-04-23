@@ -6,6 +6,7 @@ import (
 
 	"github.com/SashaMelva/car_catalog/internal/storage/memory"
 	model "github.com/SashaMelva/car_catalog/internal/storage/models"
+	"github.com/SashaMelva/car_catalog/server/filter"
 	"go.uber.org/zap"
 )
 
@@ -22,6 +23,33 @@ func New(logger *zap.SugaredLogger, storage *memory.Storage) *App {
 		Logger:      logger,
 		RegexRegNum: r,
 	}
+}
+
+func (a *App) GetCars(option filter.Option) (*model.CarCatalog, error) {
+	var err error
+	catalog := &model.CarCatalog{}
+
+	if len(option.Fileds) == 0 {
+		catalog, err = a.storage.GetAllCars()
+	} else {
+		query := ""
+
+		for i := range option.Fileds {
+			query += option.Fileds[i].Param + " " + option.Fileds[i].Operator + " " + option.Fileds[i].Value
+			if i != len(option.Fileds)-1 {
+				query += " and "
+			}
+		}
+
+		catalog, err = a.storage.GetCarsByFilter(query)
+	}
+
+	if err != nil {
+		a.Logger.Error(err)
+		return nil, err
+	}
+
+	return catalog, nil
 }
 
 func (a *App) AddCarByRegNums(regNums []string) error {
