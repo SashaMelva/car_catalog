@@ -90,10 +90,12 @@ func (s *Storage) AddCarsCatalog(cars []*model.Car) error {
 	return tx.Commit()
 }
 
-func (s *Storage) GetAllCars() (*model.CarCatalog, error) {
+func (s *Storage) GetAllCars(limit, offset int) (*model.CarCatalog, error) {
 	catalog := model.CarCatalog{}
-	query := `select reg_num, mark, model, year, owner from car_catalog`
-	rows, err := s.ConnectionDB.Query(query)
+	query := `select reg_num, mark, model, year, owner from car_catalog order by reg_num
+	limit $1 offset $2`
+
+	rows, err := s.ConnectionDB.Query(query, limit, offset)
 
 	if err != nil {
 		return nil, err
@@ -122,11 +124,12 @@ func (s *Storage) GetAllCars() (*model.CarCatalog, error) {
 	return &catalog, nil
 }
 
-func (s *Storage) GetCarsByFilter(options string) (*model.CarCatalog, error) {
+func (s *Storage) GetCarsByFilter(options string, limit, offset int) (*model.CarCatalog, error) {
 	catalog := model.CarCatalog{}
-	query := `select reg_num, mark, model, year from car_catalog where ` + options
+	query := `select reg_num, mark, model, year from car_catalog where ` + options + ` order by reg_num
+	limit $1 offset $2`
 	s.Logger.Info(query)
-	rows, err := s.ConnectionDB.Query(query)
+	rows, err := s.ConnectionDB.Query(query, limit, offset)
 
 	if err != nil {
 		return nil, err

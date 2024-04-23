@@ -30,7 +30,7 @@ func (a *App) GetCars(option filter.Option) (*model.CarCatalog, error) {
 	catalog := &model.CarCatalog{}
 
 	if len(option.Fileds) == 0 {
-		catalog, err = a.storage.GetAllCars()
+		catalog, err = a.storage.GetAllCars(option.Limit, option.Offset)
 	} else {
 		query := ""
 
@@ -41,7 +41,7 @@ func (a *App) GetCars(option filter.Option) (*model.CarCatalog, error) {
 			}
 		}
 
-		catalog, err = a.storage.GetCarsByFilter(query)
+		catalog, err = a.storage.GetCarsByFilter(query, option.Limit, option.Offset)
 	}
 
 	if err != nil {

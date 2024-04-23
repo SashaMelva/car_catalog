@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -25,6 +26,37 @@ func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 		periodYear := args.Get("periodYear")
 
 		option := filter.NewOption()
+
+		if args.Get("limit") == "" {
+			option.Limit = 100
+		} else {
+			limit, err := strconv.Atoi(args.Get("limit"))
+
+			if err != nil {
+				returnError(&ErrorResponseBody{
+					Status:  http.StatusBadRequest,
+					Message: []byte("Годы периода не могут быть пустыми"),
+				}, w)
+				return
+			}
+			option.Limit = limit
+		}
+
+		if args.Get("offset") == "" {
+			option.Offset = 0
+		} else {
+			offset, err := strconv.Atoi(args.Get("limit"))
+
+			if err != nil {
+				returnError(&ErrorResponseBody{
+					Status:  http.StatusBadRequest,
+					Message: []byte("Годы периода не могут быть пустыми"),
+				}, w)
+				return
+			}
+			option.Offset = offset
+		}
+
 		if regNums != "" {
 			option.AddFileds(filter.ParamRegNum, filter.OperatorEq, regNums, filter.DateStr)
 		}

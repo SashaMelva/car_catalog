@@ -17,6 +17,8 @@ const (
 )
 
 type Option struct {
+	Limit  int
+	Offset int
 	Fileds []*Filed
 }
 
