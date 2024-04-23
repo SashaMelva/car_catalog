@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  car_catalog_app:
+    build: ./car_catalog_app
+    depends_on:
+      - postgres
+    ports:
+      - "8088:8088"
+    environment:
+      DB_PASSWORD: 123456
+
+  postgres:
+    restart: always
+    image: postgres:latest
+    volumes:
+      - ./scripts/setup.sql:/docker-entrypoint-initdb.d/setup.sql
+    ports:
+      - "5436:5432"
+    environment:
+      POSTGRES_DB: car_catalog_db
+      POSTGRES_PASSWORD: 123456
+      
+volumes:
+  container-data:
