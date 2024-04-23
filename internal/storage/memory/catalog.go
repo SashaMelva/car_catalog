@@ -4,18 +4,28 @@ import (
 	model "github.com/SashaMelva/car_catalog/internal/storage/models"
 )
 
-func (s *Storage) DeleteCarByRegNum(regNum string) error {
-	query := `delete car_catalog where reg_num = $1`
-	_, err := s.ConnectionDB.Exec(query, regNum)
+func (s *Storage) DeleteCarByRegNum(regNums []string) error {
+	tx, err := s.ConnectionDB.Begin()
 
 	if err != nil {
 		return err
 	}
 
-	return nil
+	for i := range regNums {
+
+		query := `delete car_catalog where reg_num = $1`
+		_, err := s.ConnectionDB.Exec(query, regNums[i])
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
-func (s *Storage) UpdateCarFromCatalog(car model.Car) error {
+func (s *Storage) UpdateCarFromCatalog(car *model.Car) error {
 	query := `update car_catalog set mark=$2 model=$3 year=$4 owner=$5 where reg_num=$1`
 	_, err := s.ConnectionDB.Exec(query, car.RegNum, car.Mark, car.Model, car.Year, car.Owner)
 
@@ -24,6 +34,27 @@ func (s *Storage) UpdateCarFromCatalog(car model.Car) error {
 	}
 
 	return nil
+}
+
+func (s *Storage) UpdateCarsFromCatalog(cars []*model.Car) error {
+	tx, err := s.ConnectionDB.Begin()
+
+	if err != nil {
+		return err
+	}
+
+	for i := range cars {
+		query := `update car_catalog set mark=$2 model=$3 year=$4 owner=$5 where reg_num=$1`
+		_, err := tx.Exec(query, cars[i].RegNum, cars[i].Mark, cars[i].Model, cars[i].Year, cars[i].Owner)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+	}
+
+	return tx.Commit()
 }
 
 func (s *Storage) AddCarCatalog(car model.Car) (int, error) {
@@ -37,6 +68,26 @@ func (s *Storage) AddCarCatalog(car model.Car) (int, error) {
 	}
 
 	return carId, nil
+}
+
+func (s *Storage) AddCarsCatalog(cars []*model.Car) error {
+	tx, err := s.ConnectionDB.Begin()
+
+	if err != nil {
+		return err
+	}
+
+	for i := range cars {
+		query := `insert into car_catalog(reg_num, mark, model, year, owner) values($1, $2, $3, $4, $5)`
+		_, err := tx.Exec(query, cars[i].RegNum, cars[i].Mark, cars[i].Model, cars[i].Year, cars[i].Owner) // sql.Result
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
 func (s *Storage) GetAllCars() (*model.CarCatalog, error) {
@@ -101,15 +152,4 @@ func (s *Storage) GetCarsByFilter(options string) (*model.CarCatalog, error) {
 	}
 
 	return &catalog, nil
-}
-
-func (s *Storage) GetCarsByRegNum(regNum string) error {
-	query := `delete car_catalog where reg_num = $1`
-	_, err := s.ConnectionDB.Exec(query, regNum)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

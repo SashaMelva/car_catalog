@@ -67,13 +67,43 @@ func (a *App) AddCarByRegNums(regNums []string) error {
 }
 
 func (a *App) UpdateCars(cars []*model.Car) error {
-	return nil
+	if len(cars) == 1 {
+		err := a.storage.UpdateCarFromCatalog(cars[0])
+
+		if err != nil {
+			a.Logger.Error(err)
+			return err
+		}
+	} else if len(cars) > 1 {
+		err := a.storage.UpdateCarsFromCatalog(cars)
+
+		if err != nil {
+			a.Logger.Error(err)
+			return err
+		}
+	}
+
+	return errors.New("Данные для обновления не могут быть пустыми")
 }
 
-func (a *App) DeleteCarByRegNum(regNum string) error {
-	err := a.validRegNum(regNum)
+func (a *App) DeleteCarByRegNum(regNum []string) error {
+	var err error
 
-	if err != nil {
+	if len(regNum) > 0 {
+		for i := range regNum {
+			errNew := a.validRegNum(regNum[i])
+
+			if errNew != nil {
+				err = errors.Join(errNew, err)
+			}
+		}
+
+		if err != nil {
+			a.Logger.Error(err)
+			return err
+		}
+	} else {
+		err = errors.New("Регистрационные номера машин пусты")
 		a.Logger.Error(err)
 		return err
 	}
@@ -88,30 +118,11 @@ func (a *App) DeleteCarByRegNum(regNum string) error {
 	return nil
 }
 
-func (a *App) DeleteCarByRegNums(regNums []string) error {
-	var err error
-	for i := range regNums {
-		err = a.validRegNum(regNums[i])
-		if err != nil {
-			a.Logger.Error(err)
-			return err
-		}
-	}
-
-	err = a.storage.DeleteCarByRegNum(regNums[0])
-
-	if err != nil {
-		a.Logger.Error(err)
-	}
-
-	return nil
-}
-
 func (a *App) validRegNum(regNum string) error {
 	matched := a.RegexRegNum.MatchString(regNum)
 
 	if !matched {
-		return errors.New("Регистрационный номер машины не соответсвует стандарту ГОСТ РФ")
+		return errors.New("Регистрационный номер машины " + regNum + " не соответсвует стандарту ГОСТ РФ")
 	}
 
 	return nil
