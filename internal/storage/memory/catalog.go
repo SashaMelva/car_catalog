@@ -15,7 +15,7 @@ func (s *Storage) DeleteCarByRegNum(regNums []string) error {
 
 	for i := range regNums {
 
-		query := `delete car_catalog where reg_num = $1`
+		query := `delete from car_catalog where reg_num = $1`
 		_, err := s.ConnectionDB.Exec(query, regNums[i])
 
 		if err != nil {

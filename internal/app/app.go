@@ -17,7 +17,7 @@ type App struct {
 }
 
 func New(logger *zap.SugaredLogger, storage *memory.Storage) *App {
-	r, _ := regexp.Compile(`^[АВЕКМНОРСТУХ][0-9][0-9][0-9][АВЕКМНОРСТУХ][АВЕКМНОРСТУХ][0-9][0-9][0-9]$`)
+	r, _ := regexp.Compile(`^[ABEKMHOPCTYXАВЕКМНОРСТУХ][0-9][0-9][0-9][ABEKMHOPCTYXАВЕКМНОРСТУХ][ABEKMHOPCTYXАВЕКМНОРСТУХ][0-9][0-9][0-9]$`)
 	return &App{
 		storage:     storage,
 		Logger:      logger,

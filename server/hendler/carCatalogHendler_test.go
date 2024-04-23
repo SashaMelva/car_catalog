@@ -88,30 +88,31 @@ func TestCarCatalogHendler(t *testing.T) {
 			want:       ``,
 			statusCode: http.StatusOK,
 		},
-		// {
-		// 	name:       "Delete car",
-		// 	method:     http.MethodDelete,
-		// 	path:       "/car-catalog",
-		// 	body:       []byte("Для удаления машины необходим регистрационный номер"),
-		// 	want:       ``,
-		// 	statusCode: http.StatusBadRequest,
-		// },
-		// {
-		// 	name:       "Delete cars",
-		// 	method:     http.MethodDelete,
-		// 	path:       "/car-catalog?regNums=A777AA124",
-		// 	body:       []byte(``),
-		// 	want:       ``,
-		// 	statusCode: http.StatusOK,
-		// },
-		// {
-		// 	name:       "Delete cars",
-		// 	method:     http.MethodDelete,
-		// 	path:       "/car-catalog?regNums=A777AA124,A777AA123,A777AA121",
-		// 	body:       []byte(``),
-		// 	want:       ``,
-		// 	statusCode: http.StatusOK,
-		// },
+
+		{
+			name:       "Delete car regNum empty",
+			method:     http.MethodDelete,
+			path:       "/car-catalog",
+			body:       []byte(``),
+			want:       "Для удаления машины необходим регистрационный номер",
+			statusCode: http.StatusBadRequest,
+		},
+		{
+			name:       "Delete cars",
+			method:     http.MethodDelete,
+			path:       "/car-catalog?regNums=A777AA200",
+			body:       []byte(``),
+			want:       ``,
+			statusCode: http.StatusOK,
+		},
+		{
+			name:       "Delete cars",
+			method:     http.MethodDelete,
+			path:       "/car-catalog?regNums=A777AA129,A777AA201,A777AA209",
+			body:       []byte(``),
+			want:       ``,
+			statusCode: http.StatusBadRequest,
+		},
 	}
 
 	for _, tc := range testCase {
