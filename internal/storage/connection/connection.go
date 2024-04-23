@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/SashaMelva/car_catalog/internal/config"
+	_ "github.com/jackc/pgx/stdlib"
 	"go.uber.org/zap"
 )
 

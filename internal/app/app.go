@@ -86,9 +86,11 @@ func (a *App) UpdateCars(cars []*model.Car) error {
 			a.Logger.Error(err)
 			return err
 		}
+	} else {
+		return errors.New("Данные для обновления не могут быть пустыми")
 	}
 
-	return errors.New("Данные для обновления не могут быть пустыми")
+	return nil
 }
 
 func (a *App) DeleteCarByRegNum(regNum []string) error {

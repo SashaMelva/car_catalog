@@ -1,6 +1,8 @@
 package memory
 
 import (
+	"encoding/json"
+
 	model "github.com/SashaMelva/car_catalog/internal/storage/models"
 )
 
@@ -26,8 +28,10 @@ func (s *Storage) DeleteCarByRegNum(regNums []string) error {
 }
 
 func (s *Storage) UpdateCarFromCatalog(car *model.Car) error {
-	query := `update car_catalog set mark=$2 model=$3 year=$4 owner=$5 where reg_num=$1`
-	_, err := s.ConnectionDB.Exec(query, car.RegNum, car.Mark, car.Model, car.Year, car.Owner)
+	s.Logger.Info(car.Owner)
+	json, _ := json.Marshal(car.Owner)
+	query := `update car_catalog set mark=$2, model=$3, year=$4, owner=$5 where reg_num=$1`
+	_, err := s.ConnectionDB.Exec(query, car.RegNum, car.Mark, car.Model, car.Year, json)
 
 	if err != nil {
 		return err
@@ -44,8 +48,9 @@ func (s *Storage) UpdateCarsFromCatalog(cars []*model.Car) error {
 	}
 
 	for i := range cars {
-		query := `update car_catalog set mark=$2 model=$3 year=$4 owner=$5 where reg_num=$1`
-		_, err := tx.Exec(query, cars[i].RegNum, cars[i].Mark, cars[i].Model, cars[i].Year, cars[i].Owner)
+		json, _ := json.Marshal(cars[i].Owner)
+		query := `update car_catalog set mark=$2, model=$3, year=$4, owner=$5 where reg_num=$1`
+		_, err := tx.Exec(query, cars[i].RegNum, cars[i].Mark, cars[i].Model, cars[i].Year, json)
 
 		if err != nil {
 			tx.Rollback()
