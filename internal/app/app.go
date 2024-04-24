@@ -41,14 +41,27 @@ func (a *App) GetCars(option filter.Option) (*model.CarCatalog, error) {
 		query := ""
 
 		for i := range option.Fileds {
+			a.Logger.Debug(option.Fileds[i])
+			if i != 0 {
+				if option.Fileds[i].Group != filter.GroupNil && option.Fileds[i].Group != filter.GroupStart {
+					query += " or "
+				} else {
+					query += " and "
+				}
+			}
+
+			if option.Fileds[i].Group == filter.GroupStart {
+				query += " ( "
+			}
+
 			if option.Fileds[i].DataType == filter.DateStr {
 				query += option.Fileds[i].Param + option.Fileds[i].Operator + "'" + option.Fileds[i].Value + "'"
 			} else {
 				query += option.Fileds[i].Param + option.Fileds[i].Operator + option.Fileds[i].Value
 			}
 
-			if i != len(option.Fileds)-1 {
-				query += " and "
+			if option.Fileds[i].Group == filter.GroupEnd {
+				query += " ) "
 			}
 		}
 		a.Logger.Debug("Parce filter", query)

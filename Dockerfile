@@ -18,5 +18,6 @@ COPY go.sum .
 
 RUN go mod download
 RUN go build -o car_catalog ./cmd/main.go
+RUN goose -dir ./migrations postgres "postgresql://goose:password@127.0.0.1:8092/go_migrations?sslmode=disable" up
 
 CMD [ "./car_catalog" ]

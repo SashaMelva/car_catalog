@@ -61,16 +61,78 @@ func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 		}
 
 		if regNums != "" {
-			option.AddFileds(filter.ParamRegNum, filter.OperatorEq, regNums, filter.DateStr)
+			splitRegNums := strings.Split(regNums, ",")
+			lenI := len(splitRegNums) - 1
+
+			if len(splitRegNums) > 1 {
+				for i := range splitRegNums {
+					if i == 0 {
+						option.AddFileds(filter.ParamRegNum, filter.OperatorEq, splitRegNums[i], filter.DateStr, filter.GroupStart)
+					} else if i == lenI {
+						option.AddFileds(filter.ParamRegNum, filter.OperatorEq, splitRegNums[i], filter.DateStr, filter.GroupEnd)
+					} else {
+						option.AddFileds(filter.ParamRegNum, filter.OperatorEq, splitRegNums[i], filter.DateStr, filter.GroupElement)
+					}
+				}
+			} else {
+				option.AddFileds(filter.ParamRegNum, filter.OperatorEq, splitRegNums[0], filter.DateStr, filter.GroupNil)
+			}
 		}
 		if mark != "" {
-			option.AddFileds(filter.ParamMark, filter.OperatorEq, mark, filter.DateStr)
+			splitMark := strings.Split(mark, ",")
+			lenI := len(splitMark) - 1
+
+			s.app.Logger.Info(lenI)
+			if len(splitMark) > 1 {
+				for i := range splitMark {
+					s.app.Logger.Debug(splitMark)
+					if i == 0 {
+						option.AddFileds(filter.ParamMark, filter.OperatorEq, splitMark[i], filter.DateStr, filter.GroupStart)
+					} else if i == lenI {
+						option.AddFileds(filter.ParamMark, filter.OperatorEq, splitMark[i], filter.DateStr, filter.GroupEnd)
+					} else {
+						option.AddFileds(filter.ParamMark, filter.OperatorEq, splitMark[i], filter.DateStr, filter.GroupElement)
+					}
+				}
+			} else {
+				option.AddFileds(filter.ParamMark, filter.OperatorEq, splitMark[0], filter.DateStr, filter.GroupNil)
+			}
 		}
 		if model != "" {
-			option.AddFileds(filter.ParamModel, filter.OperatorEq, model, filter.DateStr)
+			splitModel := strings.Split(model, ",")
+			lenI := len(splitModel) - 1
+
+			if len(splitModel) > 1 {
+				for i := range splitModel {
+					if i == 0 {
+						option.AddFileds(filter.ParamModel, filter.OperatorEq, splitModel[i], filter.DateStr, filter.GroupStart)
+					} else if i == lenI {
+						option.AddFileds(filter.ParamModel, filter.OperatorEq, splitModel[i], filter.DateStr, filter.GroupEnd)
+					} else {
+						option.AddFileds(filter.ParamModel, filter.OperatorEq, splitModel[i], filter.DateStr, filter.GroupElement)
+					}
+				}
+			} else {
+				option.AddFileds(filter.ParamModel, filter.OperatorEq, splitModel[0], filter.DateStr, filter.GroupNil)
+			}
 		}
 		if year != "" {
-			option.AddFileds(filter.ParamYear, filter.OperatorEq, year, filter.DateInt)
+			splitYear := strings.Split(year, ",")
+			lenI := len(splitYear) - 1
+			s.app.Logger.Info(len(splitYear), lenI, splitYear)
+			if len(splitYear) > 1 {
+				for i := range splitYear {
+					if i == 0 {
+						option.AddFileds(filter.ParamYear, filter.OperatorEq, splitYear[i], filter.DateStr, filter.GroupStart)
+					} else if i == lenI {
+						option.AddFileds(filter.ParamYear, filter.OperatorEq, splitYear[i], filter.DateStr, filter.GroupEnd)
+					} else {
+						option.AddFileds(filter.ParamYear, filter.OperatorEq, splitYear[i], filter.DateStr, filter.GroupElement)
+					}
+				}
+			} else {
+				option.AddFileds(filter.ParamYear, filter.OperatorEq, splitYear[0], filter.DateStr, filter.GroupNil)
+			}
 		}
 		if periodYear != "" {
 			split := strings.Split(periodYear, ":")
@@ -84,11 +146,11 @@ func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 				}, w)
 				return
 			} else if split[0] == "" {
-				option.AddFileds(filter.ParamYear, filter.OperatorLowerThen, split[1], filter.DateInt)
+				option.AddFileds(filter.ParamYear, filter.OperatorLowerThen, split[1], filter.DateInt, filter.GroupNil)
 			} else if split[1] == "" {
-				option.AddFileds(filter.ParamYear, filter.OperatorHigherThen, split[0], filter.DateInt)
+				option.AddFileds(filter.ParamYear, filter.OperatorHigherThen, split[0], filter.DateInt, filter.GroupNil)
 			} else {
-				option.AddFileds(filter.ParamYear, filter.OperatorBetween, split[0]+" and "+split[1], filter.DateInt)
+				option.AddFileds(filter.ParamYear, filter.OperatorBetween, split[0]+" and "+split[1], filter.DateInt, filter.GroupNil)
 			}
 		}
 
