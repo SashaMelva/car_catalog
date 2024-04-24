@@ -25,150 +25,150 @@ func TestCarCatalogHendler(t *testing.T) {
 		want       string
 		statusCode int
 	}{
-		// {
-		// 	name:   "Update car",
-		// 	method: http.MethodPut,
-		// 	path:   "/car-catalog",
-		// 	body: []byte(`{
-		// 		"cars":[
-		// 		{
-		// 		"regNum":"A777AA129",
-		// 		"mark":"Lada",
-		// 		"model":"Vesta",
-		// 		"year":2002,
-		// 		"owner":{
-		// 			"name":"q",
-		// 			"patronymic":"q"
-		// 		}
-		// 		}
-		// 		]
-		// 		}
-		// 		`),
-		// 	want:       ``,
-		// 	statusCode: http.StatusOK,
-		// },
-		// {
-		// 	name:   "Update cars",
-		// 	method: http.MethodPut,
-		// 	path:   "/car-catalog",
-		// 	body: []byte(`{
-		// 		"cars":[
-		// 		{
-		// 		"regNum":"A777AA123",
-		// 		"mark":"Lada",
-		// 		"model":"Vesta",
-		// 		"year":2002,
-		// 		"owner":{
-		// 			"name":"q",
-		// 			"surname":"q",
-		// 			"patronymic":"q"}
-		// 		},
-		// 		{
-		// 		"regNum":"A777AA124",
-		// 		"mark":"BMW",
-		// 		"model":" M1 HOMMAGE",
-		// 		"year":2002,
-		// 		"owner":{
-		// 			"name":"q",
-		// 			"surname":"q",
-		// 			"patronymic":"q"}
-		// 		},
-		// 		{
-		// 		"regNum":"X123XX150",
-		// 		"mark":"Lada",
-		// 		"model":"Vesta",
-		// 		"year":2002,
-		// 		"owner":{
-		// 			"name":"q",
-		// 			"surname":"q",
-		// 			"patronymic":"q"}
-		// 		}
-		// 		]
-		// 		}`),
-		// 	want:       ``,
-		// 	statusCode: http.StatusOK,
-		// },
+		{
+			name:   "Update car",
+			method: http.MethodPut,
+			path:   "/car-catalog",
+			body: []byte(`{
+				"cars":[
+				{
+				"regNum":"A777AA129",
+				"mark":"Lada",
+				"model":"Vesta",
+				"year":2002,
+				"owner":{
+					"name":"q",
+					"patronymic":"q"
+				}
+				}
+				]
+				}
+				`),
+			want:       ``,
+			statusCode: http.StatusOK,
+		},
+		{
+			name:   "Update cars",
+			method: http.MethodPut,
+			path:   "/car-catalog",
+			body: []byte(`{
+				"cars":[
+				{
+				"regNum":"A777AA123",
+				"mark":"Lada",
+				"model":"Vesta",
+				"year":2002,
+				"owner":{
+					"name":"q",
+					"surname":"q",
+					"patronymic":"q"}
+				},
+				{
+				"regNum":"A777AA124",
+				"mark":"BMW",
+				"model":" M1 HOMMAGE",
+				"year":2002,
+				"owner":{
+					"name":"q",
+					"surname":"q",
+					"patronymic":"q"}
+				},
+				{
+				"regNum":"X123XX150",
+				"mark":"Lada",
+				"model":"Vesta",
+				"year":2002,
+				"owner":{
+					"name":"q",
+					"surname":"q",
+					"patronymic":"q"}
+				}
+				]
+				}`),
+			want:       ``,
+			statusCode: http.StatusOK,
+		},
 
-		// {
-		// 	name:       "Delete car regNum empty",
-		// 	method:     http.MethodDelete,
-		// 	path:       "/car-catalog",
-		// 	body:       []byte(``),
-		// 	want:       "Для удаления машины необходим регистрационный номер",
-		// 	statusCode: http.StatusBadRequest,
-		// },
-		// {
-		// 	name:       "Delete cars",
-		// 	method:     http.MethodDelete,
-		// 	path:       "/car-catalog?regNums=A777AA200",
-		// 	body:       []byte(``),
-		// 	want:       ``,
-		// 	statusCode: http.StatusOK,
-		// },
-		// {
-		// 	name:       "Delete cars",
-		// 	method:     http.MethodDelete,
-		// 	path:       "/car-catalog?regNums=A777AA129,A777AA201,A777AA209",
-		// 	body:       []byte(``),
-		// 	want:       ``,
-		// 	statusCode: http.StatusBadRequest,
-		// },
-		// {
-		// 	name:       "Get all cars",
-		// 	method:     http.MethodGet,
-		// 	path:       "/car-catalog",
-		// 	body:       []byte(``),
-		// 	want:       ``,
-		// 	statusCode: http.StatusOK,
-		// },
-		// {
-		// 	name:       "Get cars by regNums",
-		// 	method:     http.MethodGet,
-		// 	path:       "/car-catalog?regNum=A777AA111",
-		// 	body:       []byte(``),
-		// 	want:       ``,
-		// 	statusCode: http.StatusOK,
-		// },
-		// {
-		// 	name:       "Get all cars by limit and offset",
-		// 	method:     http.MethodGet,
-		// 	path:       "/car-catalog?limit=2&offset=2",
-		// 	body:       []byte(``),
-		// 	want:       ``,
-		// 	statusCode: http.StatusOK,
-		// },
-		// {
-		// 	name:       "Get cars by model and mark",
-		// 	method:     http.MethodGet,
-		// 	path:       "/car-catalog?mark=BMW",
-		// 	body:       []byte(``),
-		// 	want:       ``,
-		// 	statusCode: http.StatusOK,
-		// },
-		// {
-		// 	name:       "Get cars by model and mark",
-		// 	method:     http.MethodGet,
-		// 	path:       "/car-catalog?periodYear=2003:2024",
-		// 	body:       []byte(``),
-		// 	want:       ``,
-		// 	statusCode: http.StatusOK,
-		// },
-		// {
-		// 	name:       "Get cars by year lower",
-		// 	method:     http.MethodGet,
-		// 	path:       "/car-catalog?periodYear=:2024",
-		// 	body:       []byte(``),
-		// 	want:       ``,
-		// 	statusCode: http.StatusOK,
-		// },
-		// {
-		// 	name:       "Get cars by year upper",
-		// 	method:     http.MethodGet,
-		// 	path:       "/car-catalog?periodYear=2000:&limit=1",
-		// 	body:       []byte(``),
-		// 	want:       ``,
-		// 	statusCode: http.StatusOK,
-		// },
+		{
+			name:       "Delete car regNum empty",
+			method:     http.MethodDelete,
+			path:       "/car-catalog",
+			body:       []byte(``),
+			want:       "Для удаления машины необходим регистрационный номер",
+			statusCode: http.StatusBadRequest,
+		},
+		{
+			name:       "Delete cars",
+			method:     http.MethodDelete,
+			path:       "/car-catalog?regNums=A777AA200",
+			body:       []byte(``),
+			want:       ``,
+			statusCode: http.StatusOK,
+		},
+		{
+			name:       "Delete cars",
+			method:     http.MethodDelete,
+			path:       "/car-catalog?regNums=A777AA129,A777AA201,A777AA209",
+			body:       []byte(``),
+			want:       ``,
+			statusCode: http.StatusBadRequest,
+		},
+		{
+			name:       "Get all cars",
+			method:     http.MethodGet,
+			path:       "/car-catalog",
+			body:       []byte(``),
+			want:       ``,
+			statusCode: http.StatusOK,
+		},
+		{
+			name:       "Get cars by regNums",
+			method:     http.MethodGet,
+			path:       "/car-catalog?regNum=A777AA111",
+			body:       []byte(``),
+			want:       ``,
+			statusCode: http.StatusOK,
+		},
+		{
+			name:       "Get all cars by limit and offset",
+			method:     http.MethodGet,
+			path:       "/car-catalog?limit=2&offset=2",
+			body:       []byte(``),
+			want:       ``,
+			statusCode: http.StatusOK,
+		},
+		{
+			name:       "Get cars by model and mark",
+			method:     http.MethodGet,
+			path:       "/car-catalog?mark=BMW",
+			body:       []byte(``),
+			want:       ``,
+			statusCode: http.StatusOK,
+		},
+		{
+			name:       "Get cars by model and mark",
+			method:     http.MethodGet,
+			path:       "/car-catalog?periodYear=2003:2024",
+			body:       []byte(``),
+			want:       ``,
+			statusCode: http.StatusOK,
+		},
+		{
+			name:       "Get cars by year lower",
+			method:     http.MethodGet,
+			path:       "/car-catalog?periodYear=:2024",
+			body:       []byte(``),
+			want:       ``,
+			statusCode: http.StatusOK,
+		},
+		{
+			name:       "Get cars by year upper",
+			method:     http.MethodGet,
+			path:       "/car-catalog?periodYear=2000:&limit=1",
+			body:       []byte(``),
+			want:       ``,
+			statusCode: http.StatusOK,
+		},
 		{
 			name:   "add cars",
 			method: http.MethodPost,
@@ -219,7 +219,8 @@ func testService() *Service {
 	}, log)
 
 	memstorage := memory.New(connection.StorageDb, log)
-	calendar := app.New(log, memstorage)
+	host := "localhost"
+	calendar := app.New(log, memstorage, &host)
 
 	return &Service{
 		Logger: *log,
