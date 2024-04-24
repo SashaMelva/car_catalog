@@ -1,0 +1,159 @@
+openapi: 3.0.3
+info:
+  title: Car Catalog
+  version: '0.1'
+paths:
+  /car-catalog:
+    get:
+      summary: Get cars by parameters
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+        - name: regNum
+          in: query
+          schema:
+            type: string
+        - name: mark
+          in: query
+          schema:
+            type: string
+        - name: model
+          in: query
+          schema:
+            type: string
+        - in: query
+          name: year
+          example:
+            2003
+          schema:
+            type: integer
+        - in: query
+          name: periodYear
+          example:
+            "2000:2024"
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarCatalog'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+    delete:
+      summary: Delete cars
+      parameters:
+        - name: regNums
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+    post:
+      summary: Add cars
+      requestBody:
+        description: Create cars by reg nums
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegNums'
+          text/plain:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Ok
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+    put:
+      summary: Put cars
+      requestBody:
+        description: Create cars by reg nums
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarCatalog'
+          text/plain:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Ok
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+components:
+  schemas:
+    RegNums:
+      type: object
+      properties:
+        regNums:
+          type: array
+          items:
+            type: string
+    CarCatalog:
+      type: object
+      properties:
+        cars:
+            type: array
+            items:
+              type: object
+              schema:
+              $ref: '#/components/schemas/Car'
+    Car:
+      required:
+        - regNum
+        - mark
+        - model
+        - owner
+      type: object
+      properties:
+        regNum:
+          type: string
+          example: X123XX150
+        mark:
+          type: string
+          example: Lada
+        model:
+          type: string
+          example: Vesta
+        year:
+          type: integer
+          example: 2002
+        owner:
+          $ref: '#/components/schemas/People'
+    People:
+      required:
+        - name
+        - surname
+      type: object
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        patronymic:
+          type: string

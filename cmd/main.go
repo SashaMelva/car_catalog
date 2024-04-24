@@ -22,6 +22,13 @@ func init() {
 	flag.StringVar(&configFile, "config", "../configFiles/", "Path to configuration file")
 }
 
+// @title           Car Catalog API
+// @version         1.0
+// @description     This is a sample server car catalog.
+
+// @host      localhost:8080
+// @BasePath  /
+
 func main() {
 
 	config := config.New(configFile)

@@ -129,6 +129,22 @@ func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 	s.Logger.Debug("Method implementation not found")
 }
 
+// ShowAccount godoc
+// @Summary      Get all cars
+// @Description  get cars by params
+// @Tags         car-catalog
+// @Accept       json
+// @Produce      json
+// @Param        regNum   path string
+// @Param        mark   path string
+// @Param        model   path string
+// @Param        year   path integer
+// @Param        periodYear   path string
+// @Success      200  {object}  model.CarCatalog
+// @Failure      400  {object}  ErrorResponseBody
+// @Failure      500  {object}  ErrorResponseBody
+// @Router       /car-catalog [get]
+
 func (s *Service) getAllCars(option filter.Option, w http.ResponseWriter, req *http.Request, ctx context.Context) {
 	cars, err := s.app.GetCars(option)
 
@@ -157,6 +173,17 @@ func (s *Service) getAllCars(option filter.Option, w http.ResponseWriter, req *h
 	w.Write(json)
 }
 
+// AddCars godoc
+// @Summary      Add cars
+// @Description  Add cars by reg Num
+// @Tags         car-catalog
+// @Accept       json
+// @Produce      json
+// Param         regNums   body   model.RegNumsCatalog
+// @Success      200
+// @Failure      400  {object}  ErrorResponseBody
+// @Failure      500  {object}  ErrorResponseBody
+// @Router       /car-catalog [post]
 func (s *Service) addCarByRegNums(w http.ResponseWriter, req *http.Request, ctx context.Context) {
 	regNums := model.RegNumsCatalog{}
 	body, err := io.ReadAll(req.Body)
@@ -204,6 +231,17 @@ func (s *Service) addCarByRegNums(w http.ResponseWriter, req *http.Request, ctx 
 	w.WriteHeader(http.StatusOK)
 }
 
+// UpdateCars godoc
+// @Summary      Update cars
+// @Description  Update many cars by reg nums
+// @Tags         car-catalog
+// @Accept       json
+// @Produce      json
+// Param         cars   body      model.CarCatalog
+// @Success      200
+// @Failure      400  {object}  ErrorResponseBody
+// @Failure      500  {object}  ErrorResponseBody
+// @Router       /car-catalog [put]
 func (s *Service) updateCars(w http.ResponseWriter, req *http.Request, ctx context.Context) {
 	cars := model.CarCatalog{}
 	body, err := io.ReadAll(req.Body)
@@ -250,6 +288,17 @@ func (s *Service) updateCars(w http.ResponseWriter, req *http.Request, ctx conte
 	w.WriteHeader(http.StatusOK)
 }
 
+// DeleteCars godoc
+// @Summary      Delete cars
+// @Description  delete cars by reg nums. One or many
+// @Tags         car-catalog
+// @Accept       json
+// @Produce      json
+// @Param        regNum path string true "The string reg nums" example(A777AA777, A777AA777)
+// @Success      200
+// @Failure      400  {object}  ErrorResponseBody
+// @Failure      500  {object}  ErrorResponseBody
+// @Router       /car-catalog [delete]
 func (s *Service) deleteCarByRegNums(regNums []string, w http.ResponseWriter, req *http.Request, ctx context.Context) {
 	err := s.app.DeleteCarByRegNum(regNums)
 
