@@ -6,22 +6,25 @@ import (
 
 	"github.com/SashaMelva/car_catalog/internal/storage/memory"
 	model "github.com/SashaMelva/car_catalog/internal/storage/models"
+	"github.com/SashaMelva/car_catalog/server/client"
 	"github.com/SashaMelva/car_catalog/server/filter"
 	"go.uber.org/zap"
 )
 
 type App struct {
-	storage     *memory.Storage
-	Logger      *zap.SugaredLogger
-	RegexRegNum *regexp.Regexp
+	HostClientApi string
+	storage       *memory.Storage
+	Logger        *zap.SugaredLogger
+	RegexRegNum   *regexp.Regexp
 }
 
-func New(logger *zap.SugaredLogger, storage *memory.Storage) *App {
+func New(logger *zap.SugaredLogger, storage *memory.Storage, host *string) *App {
 	r, _ := regexp.Compile(`^[ABEKMHOPCTYXАВЕКМНОРСТУХ][0-9][0-9][0-9][ABEKMHOPCTYXАВЕКМНОРСТУХ][ABEKMHOPCTYXАВЕКМНОРСТУХ][0-9][0-9][0-9]$`)
 	return &App{
-		storage:     storage,
-		Logger:      logger,
-		RegexRegNum: r,
+		HostClientApi: *host,
+		storage:       storage,
+		Logger:        logger,
+		RegexRegNum:   r,
 	}
 }
 
@@ -38,7 +41,12 @@ func (a *App) GetCars(option filter.Option) (*model.CarCatalog, error) {
 		query := ""
 
 		for i := range option.Fileds {
-			query += option.Fileds[i].Param + " " + option.Fileds[i].Operator + " " + option.Fileds[i].Value
+			if option.Fileds[i].DataType == filter.DateStr {
+				query += option.Fileds[i].Param + option.Fileds[i].Operator + "'" + option.Fileds[i].Value + "'"
+			} else {
+				query += option.Fileds[i].Param + option.Fileds[i].Operator + option.Fileds[i].Value
+			}
+
 			if i != len(option.Fileds)-1 {
 				query += " and "
 			}
@@ -63,6 +71,21 @@ func (a *App) AddCarByRegNums(regNums []string) error {
 		if err != nil {
 			a.Logger.Error("Valid error: ", err)
 			return err
+		}
+	}
+
+	for i := range regNums {
+		req, err := client.GetInfoCarByRegNum(regNums[i], a.HostClientApi, a.Logger)
+		if err != nil {
+			a.Logger.Error("Error: ", err)
+			return err
+		}
+
+		if req.Code == "200" {
+			err = a.storage.AddCarCatalog(*req.Content)
+
+		} else {
+			return errors.New(req.Description)
 		}
 	}
 

@@ -30,7 +30,7 @@ func main() {
 	connectionDB := connection.New(config.DataBase, log)
 
 	memstorage := memory.New(connectionDB.StorageDb, log)
-	app := app.New(log, memstorage)
+	app := app.New(log, memstorage, config.HostClientApi)
 
 	httpServer := http.NewServer(log, app, config.HttpServer)
 

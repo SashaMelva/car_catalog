@@ -8,7 +8,7 @@ const (
 	OperatorNotEq      = "!="
 	OperatorLowerThen  = "<="
 	OperatorHigherThen = ">="
-	OperatorBetween    = "between"
+	OperatorBetween    = " between "
 
 	ParamModel  = "model"
 	ParamRegNum = "reg_num"

@@ -8,9 +8,10 @@ import (
 )
 
 type Config struct {
-	HttpServer *ConfigHttpServer
-	Logger     *ConfigLogger
-	DataBase   *ConfigDB
+	HostClientApi *string
+	HttpServer    *ConfigHttpServer
+	Logger        *ConfigLogger
+	DataBase      *ConfigDB
 }
 
 type ConfigHttpServer struct {
@@ -44,6 +45,7 @@ func New(pahToFile string) Config {
 	}
 
 	configLog := ConfigLogger{}
+	hostClient := viper.Get("hostClientApi").(string)
 	configDB := ConfigDB{
 		NameDB:   viper.Get("nameDB").(string),
 		Host:     viper.Get("hostDB").(string),
@@ -65,8 +67,9 @@ func New(pahToFile string) Config {
 	}
 
 	return Config{
-		HttpServer: &configHttpServer,
-		Logger:     &configLog,
-		DataBase:   &configDB,
+		HostClientApi: &hostClient,
+		HttpServer:    &configHttpServer,
+		Logger:        &configLog,
+		DataBase:      &configDB,
 	}
 }

@@ -75,6 +75,7 @@ func (s *Service) CarCatalogHendler(w http.ResponseWriter, req *http.Request) {
 		if periodYear != "" {
 			split := strings.Split(periodYear, ":")
 
+			s.Logger.Info(split[0], split[1])
 			if split[0] == "" && split[1] == "" {
 				s.Logger.Error("Годы периода не могут быть пустыми")
 				returnError(&ErrorResponseBody{
@@ -184,6 +185,7 @@ func (s *Service) addCarByRegNums(w http.ResponseWriter, req *http.Request, ctx 
 		}, w)
 		return
 	}
+	s.Logger.Info("Регистрационные номера машин для добавления: ", regNums.RegNums)
 
 	err = s.app.AddCarByRegNums(regNums.RegNums)
 

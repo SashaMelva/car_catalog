@@ -62,17 +62,15 @@ func (s *Storage) UpdateCarsFromCatalog(cars []*model.Car) error {
 	return tx.Commit()
 }
 
-func (s *Storage) AddCarCatalog(car model.Car) (int, error) {
-	var carId int
+func (s *Storage) AddCarCatalog(car model.Car) error {
 	query := `insert into car_catalog(reg_num, mark, model, year, owner) values($1, $2, $3, $4, $5) RETURNING id`
-	result := s.ConnectionDB.QueryRow(query, car.RegNum, car.Mark, car.Model, car.Year, car.Owner) // sql.Result
-	err := result.Scan(&carId)
+	_, err := s.ConnectionDB.Exec(query, car.RegNum, car.Mark, car.Model, car.Year, car.Owner)
 
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	return carId, nil
+	return nil
 }
 
 func (s *Storage) AddCarsCatalog(cars []*model.Car) error {
@@ -97,7 +95,7 @@ func (s *Storage) AddCarsCatalog(cars []*model.Car) error {
 
 func (s *Storage) GetAllCars(limit, offset int) (*model.CarCatalog, error) {
 	catalog := model.CarCatalog{}
-	query := `select reg_num, mark, model, year, owner from car_catalog order by reg_num
+	query := `select reg_num, mark, model, year from car_catalog order by reg_num
 	limit $1 offset $2`
 
 	rows, err := s.ConnectionDB.Query(query, limit, offset)
@@ -115,7 +113,6 @@ func (s *Storage) GetAllCars(limit, offset int) (*model.CarCatalog, error) {
 			&car.Mark,
 			&car.Model,
 			&car.Year,
-			&car.Owner,
 		); err != nil {
 			return nil, err
 		}

@@ -1,23 +1,42 @@
 package client
 
 import (
-	"fmt"
+	"encoding/json"
 	"io"
 	"net/http"
-	"os"
-	"time"
+
+	model "github.com/SashaMelva/car_catalog/internal/storage/models"
+	"go.uber.org/zap"
 )
 
-func NewClient() {
-	client := http.Client{
-		Timeout: 6 * time.Second,
-	}
-	resp, err := client.Get("https://google.com/info")
+func GetInfoCarByRegNum(regNum, clientHost string, log *zap.SugaredLogger) (*model.RequestBody, error) {
+	client := http.Client{}
+	req, err := http.NewRequest("get", clientHost+"/info?regNum="+regNum, nil)
+
 	if err != nil {
-		fmt.Println(err)
-		return
+		return nil, err
 	}
-	defer resp.Body.Close()
-	io.Copy(os.Stdout, resp.Body)
+
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := io.ReadAll(response.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	log.Debug(string(buf))
+
+	requestBody := model.RequestBody{}
+	err = json.Unmarshal(buf, &requestBody)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &requestBody, err
 
 }
