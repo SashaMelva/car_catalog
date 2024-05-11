@@ -4,61 +4,56 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"time"
+	"os"
 
 	"github.com/SashaMelva/car_catalog/internal/app"
 	"github.com/SashaMelva/car_catalog/internal/config"
 	"github.com/SashaMelva/car_catalog/server/hendler"
-	"github.com/rs/cors"
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
 type Server struct {
-	HttpServer *http.Server
+	srv *http.Server
+	log *zap.SugaredLogger
 }
 
 func NewServer(log *zap.SugaredLogger, app *app.App, config *config.ConfigHttpServer) *Server {
 	log.Info("URL api " + config.Host + ":" + config.Port)
 	log.Debug("URL api running " + config.Host + ":" + config.Port)
-	timeout := config.Timeout * time.Second
 
-	mux := http.NewServeMux()
-	h := hendler.NewService(log, app, timeout)
+	router := gin.Default()
+	h := hendler.NewHendler(log, app)
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	router.GET("/", func(ctx *gin.Context) {
+		fmt.Println("Hellow world)")
 		log.Debug("Test path working")
-		fmt.Fprintf(w, "Hello World!")
 	})
-	mux.HandleFunc("/car-catalog", h.CarCatalogHendler)
 
-	cors := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{
-			http.MethodPost,
-			http.MethodGet,
-			http.MethodDelete,
-			http.MethodPut,
-		},
-		AllowedHeaders:   []string{"*"},
-		AllowCredentials: false,
-	})
-	handler := cors.Handler(mux)
+	router.GET("/car-catalog/", h.GetCarsCatalogHendler)
+	router.POST("/car-catalog/", h.AddCarsCatalogHendler)
+	router.PUT("/car-catalog/", h.UpdateCarsCatalogHendler)
+	router.DELETE("/car-catalog/", h.DeleteCarByRegNumsHendler)
+
 	return &Server{
-		&http.Server{
-			Addr:         config.Host + ":" + config.Port,
-			Handler:      handler,
-			ReadTimeout:  timeout,
-			WriteTimeout: timeout,
+		srv: &http.Server{
+			Addr:    config.Host + ":" + config.Port,
+			Handler: router,
 		},
+		log: log,
 	}
 }
 
-func (s *Server) Start(ctx context.Context) error {
-	err := s.HttpServer.ListenAndServe()
-	<-ctx.Done()
-	return err
+func (s *Server) Start(ctx context.Context) {
+	if err := s.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		s.log.Fatalf("listen: %s\n", err)
+	}
 }
 
-func (s *Server) Stop(ctx context.Context) error {
-	return s.HttpServer.Shutdown(ctx)
+func (s *Server) Stop(ctx context.Context) {
+	if err := s.srv.Shutdown(ctx); err != nil {
+		s.log.Fatal("Server forced to shutdown: ", err)
+	}
+
+	os.Exit(1)
 }

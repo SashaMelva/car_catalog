@@ -9,8 +9,7 @@ COPY ./ ${CODE_DIR}
 
 RUN apt-get update
 RUN apt-get -y install postgresql-client
-# RUN chmod +x ./
-RUN chmod +x ${CODE_DIR}wait-for-postgres.sh
+
 
 # Кэшируем слои с модулями
 COPY go.mod .

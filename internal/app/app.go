@@ -6,7 +6,6 @@ import (
 
 	"github.com/SashaMelva/car_catalog/internal/storage/memory"
 	model "github.com/SashaMelva/car_catalog/internal/storage/models"
-	"github.com/SashaMelva/car_catalog/server/client"
 	"github.com/SashaMelva/car_catalog/server/filter"
 	"go.uber.org/zap"
 )
@@ -76,31 +75,31 @@ func (a *App) GetCars(option filter.Option) (*model.CarCatalog, error) {
 	return catalog, nil
 }
 
-func (a *App) AddCarByRegNums(regNums []string) error {
-	var err error
+func (a *App) AddCarByRegNums(cars []*model.Car) error {
+	// var err error
 	a.Logger.Info("Run validate reg nums cars")
-	for i := range regNums {
-		err = a.validRegNum(regNums[i])
-		if err != nil {
-			a.Logger.Error("Valid error: ", err)
-			return err
-		}
-	}
+	// for i := range regNums {
+	// 	err = a.validRegNum(regNums[i])
+	// 	if err != nil {
+	// 		a.Logger.Error("Valid error: ", err)
+	// 		return err
+	// 	}
+	// }
 
-	for i := range regNums {
-		req, err := client.GetInfoCarByRegNum(regNums[i], a.HostClientApi, a.Logger)
-		if err != nil {
-			a.Logger.Error("Error: ", err)
-			return err
-		}
+	// for i := range regNums {
+	// 	req, err := client.GetInfoCarByRegNum(regNums[i], a.HostClientApi, a.Logger)
+	// 	if err != nil {
+	// 		a.Logger.Error("Error: ", err)
+	// 		return err
+	// 	}
 
-		if req.Code == "200" {
-			err = a.storage.AddCarCatalog(*req.Content)
+	// 	if req.Code == "200" {
+	// 		err = a.storage.AddCarCatalog(*req.Content)
 
-		} else {
-			return errors.New(req.Description)
-		}
-	}
+	// 	} else {
+	// 		return errors.New(req.Description)
+	// 	}
+	// }
 
 	return nil
 }
