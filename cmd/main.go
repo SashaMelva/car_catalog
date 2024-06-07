@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -51,17 +50,6 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 		defer cancel()
 
-		if err := httpServer.Stop(ctx); err != nil {
-			log.Error("failed to stop http server: " + err.Error())
-		}
+		httpServer.Stop(ctx)
 	}()
-
-	log.Info("Services is running...")
-	log.Debug("Debug mode enabled")
-
-	if err := httpServer.Start(ctx); err != nil {
-		log.Error("failed to start http server: " + err.Error())
-		cancel()
-		os.Exit(1)
-	}
 }

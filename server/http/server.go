@@ -22,6 +22,7 @@ func NewServer(log *zap.SugaredLogger, app *app.App, config *config.ConfigHttpSe
 	log.Info("URL api " + config.Host + ":" + config.Port)
 	log.Debug("URL api running " + config.Host + ":" + config.Port)
 
+	// gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	h := hendler.NewHendler(log, app)
 
@@ -31,10 +32,12 @@ func NewServer(log *zap.SugaredLogger, app *app.App, config *config.ConfigHttpSe
 	})
 
 	router.GET("/car-catalog/", h.GetCarsCatalogHendler)
+	router.GET("/car-catalog/wb", h.HandleConnections)
 	router.POST("/car-catalog/", h.AddCarsCatalogHendler)
 	router.PUT("/car-catalog/", h.UpdateCarsCatalogHendler)
 	router.DELETE("/car-catalog/", h.DeleteCarByRegNumsHendler)
 
+	router.Run(":" + config.Port)
 	return &Server{
 		srv: &http.Server{
 			Addr:    config.Host + ":" + config.Port,
@@ -46,7 +49,7 @@ func NewServer(log *zap.SugaredLogger, app *app.App, config *config.ConfigHttpSe
 
 func (s *Server) Start(ctx context.Context) {
 	if err := s.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		s.log.Fatalf("listen: %s\n", err)
+		s.log.Fatal("listen: ", err)
 	}
 }
 
